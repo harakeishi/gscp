@@ -1,0 +1,9 @@
+Host testhost
+    # ホスト名
+    HostName 192.0.2.1
+    # ユーザー名
+    User myuser
+    # 接続用の鍵ファイルパス
+    IdentityFile ~/.ssh/id_rsa
+    # コネクションの切断防止(60秒周期でパケット送信)
+    ServerAliveInterval  60
