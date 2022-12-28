@@ -21,7 +21,7 @@ func Path(p string) option {
 	}
 }
 
-func Load(path ...option) string {
+func LoadConfig(path ...option) (string, error) {
 
 	home, _ := os.UserHomeDir()
 	p := &LoadOpts{
@@ -30,13 +30,16 @@ func Load(path ...option) string {
 	for _, opt := range path {
 		opt(p)
 	}
-	f, _ := os.Open(p.path)
+	f, err := os.Open(p.path)
+	if err != nil {
+		return "", fmt.Errorf("ERROR LoadConfig() Open: %w", err)
+	}
 	defer f.Close()
 	data, err := io.ReadAll(f)
 	if err != nil {
-		fmt.Println(err)
+		return "", fmt.Errorf("ERROR LoadConfig() ReadAll: %w", err)
 	}
-	return string(data)
+	return string(data), nil
 }
 
 type Host struct {
@@ -57,14 +60,14 @@ func Parse(s string) []Host {
 	for _, v := range tmp {
 		if r.MatchString(v) {
 			arr := strings.Fields(v)
-			if arr[0] == "Host" {
+			if strings.ToLower(arr[0]) == "host" {
 				hosts = append(hosts, Host{Name: arr[1]})
 			}
-			if arr[0] == "Include" {
+			if strings.ToLower(arr[0]) == "include" {
 				home, _ := os.UserHomeDir()
 				files, _ := filepath.Glob(filepath.Join(home, ".ssh", arr[1]))
 				for _, f := range files {
-					s := Load(Path(f))
+					s, _ := LoadConfig(Path(f))
 					hosts = append(hosts, Parse(s)...)
 				}
 			}
@@ -83,6 +86,5 @@ func Parse(s string) []Host {
 			hosts[len(hosts)-1].Options = append(hosts[len(hosts)-1].Options, Option{Name: s[0], Value: s[1]})
 		}
 	}
-	fmt.Printf("%+v\n", hosts)
 	return hosts
 }
