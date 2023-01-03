@@ -1,5 +1,6 @@
 # gscp
 `gscp` is the ssh-config parser available in go.
+
 `gscp` is named as an abbreviation of `go ssh config parser`.
 
 
@@ -26,9 +27,9 @@ import (
 )
 
 func main() {
-    // Reads a config file and gets it as a string
+    	// Reads a config file and gets it as a string
 	s, _ := gscp.LoadConfig()
-    // parse
+    	// parse
 	fmt.Println(gscp.Parse(s))
 }
 ```
@@ -49,13 +50,14 @@ import (
 )
 
 func main() {
-    // Reads a config file and gets it as a string
+    	// Reads a config file and gets it as a string
 	path := gscp.Path("./testData/test1_config")
 	s, _ := gscp.LoadConfig(path)
-    // parse
+    	// parse
 	fmt.Println(gscp.Parse(s))
 }
 ```
 ## License
 Copyright (c) 2023 harakeishi
+
 Licensed under [MIT](LICENSE)
