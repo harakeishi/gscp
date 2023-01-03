@@ -13,6 +13,16 @@ type LoadOpts struct {
 	path string
 }
 
+type Host struct {
+	Name    string
+	Options []Option
+}
+
+type Option struct {
+	Name  string
+	Value string
+}
+
 type option func(*LoadOpts)
 
 func Path(p string) option {
@@ -42,17 +52,7 @@ func LoadConfig(path ...option) (string, error) {
 	return string(data), nil
 }
 
-type Host struct {
-	Name    string
-	Options []Option
-}
-
-type Option struct {
-	Name  string
-	Value string
-}
-
-func Parse(s string) []Host {
+func Parse(s string) ([]Host, error) {
 	var hosts []Host
 	reg := "\r\n|\n"
 	tmp := regexp.MustCompile(reg).Split(s, -1)
@@ -67,8 +67,15 @@ func Parse(s string) []Host {
 				home, _ := os.UserHomeDir()
 				files, _ := filepath.Glob(filepath.Join(home, ".ssh", arr[1]))
 				for _, f := range files {
-					s, _ := LoadConfig(Path(f))
-					hosts = append(hosts, Parse(s)...)
+					s, err := LoadConfig(Path(f))
+					if err != nil {
+						return nil, fmt.Errorf("ERROR Parse(): %w", err)
+					}
+					t, err := Parse(s)
+					if err != nil {
+						return nil, fmt.Errorf("ERROR Parse(): %w", err)
+					}
+					hosts = append(hosts, t...)
 				}
 			}
 		} else {
@@ -83,8 +90,11 @@ func Parse(s string) []Host {
 			if len(s) == 0 {
 				continue
 			}
+			if len(hosts) == 0 {
+				continue
+			}
 			hosts[len(hosts)-1].Options = append(hosts[len(hosts)-1].Options, Option{Name: s[0], Value: s[1]})
 		}
 	}
-	return hosts
+	return hosts, nil
 }

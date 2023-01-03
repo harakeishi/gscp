@@ -1,28 +1,9 @@
 package smp
 
 import (
+	"reflect"
 	"testing"
 )
-
-// func TestParse(t *testing.T) {
-// 	type args struct {
-// 		s string
-// 	}
-// 	tests := []struct {
-// 		name string
-// 		args args
-// 		want []Host
-// 	}{
-// 		// TODO: Add test cases.
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			if got := Parse(tt.args.s); !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("Parse() = %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
 
 func TestLoadConfig(t *testing.T) {
 	type args struct {
@@ -81,6 +62,90 @@ func TestLoadConfig(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("LoadConfig() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestParse(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []Host
+		wantErr bool
+	}{
+		{
+			name: "Must be able to do a minimum of perspective.",
+			args: args{
+				s: `Host testhost
+				# ホスト名
+				HostName 192.0.2.1
+				# ユーザー名
+				User myuser
+				# 接続用の鍵ファイルパス
+				IdentityFile ~/.ssh/id_rsa
+				# コネクションの切断防止(60秒周期でパケット送信)
+				ServerAliveInterval  60`,
+			},
+			want: []Host{
+				{
+					Name: "testhost",
+					Options: []Option{
+						{
+							Name:  "HostName",
+							Value: "192.0.2.1",
+						},
+						{
+							Name:  "User",
+							Value: "myuser",
+						},
+						{
+							Name:  "IdentityFile",
+							Value: "~/.ssh/id_rsa",
+						},
+						{
+							Name:  "ServerAliveInterval",
+							Value: "60",
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "The ability to parse the include.",
+			args: args{
+				s: `include testData/*
+Host testhost
+	# ホスト名
+	HostName 192.0.2.1`,
+			},
+			want: []Host{
+				{
+					Name: "testhost",
+					Options: []Option{
+						{
+							Name:  "HostName",
+							Value: "192.0.2.1",
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := Parse(tt.args.s)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Parse() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Parse() = %v, want %v", got, tt.want)
 			}
 		})
 	}
