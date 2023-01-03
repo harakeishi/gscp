@@ -44,7 +44,7 @@ func TestLoadConfig(t *testing.T) {
 			},
 			want:       "",
 			wantErr:    true,
-			wantErrMsg: "ERROR LoadConfig() Open: open ./testData/hoge: The system cannot find the file specified.",
+			wantErrMsg: "ERROR LoadConfig() Open: open ./testData/hoge: no such file or directory",
 		},
 	}
 	for _, tt := range tests {
