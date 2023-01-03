@@ -27,16 +27,17 @@ import (
 )
 
 func main() {
-    	// Reads a config file and gets it as a string
+	// Reads a config file and gets it as a string
 	s, _ := gscp.LoadConfig()
-    	// parse
-	fmt.Println(gscp.Parse(s))
+	// parse
+	r, _ := gscp.Parse(s)
+	fmt.Printf("%+v", r)
 }
 ```
 
-```bash
-go run ./cmd/main.go
-[{testhost [{HostName 192.0.2.1} {User myuser} {IdentityFile ~/.ssh/id_rsa} {ServerAliveInterval 60}]}]
+```sh
+$ go run ./cmd/main.go
+[{Name:testhost Options:[{Name:HostName Value:192.0.2.1} {Name:User Value:myuser} {Name:IdentityFile Value:~/.ssh/id_rsa} {Name:ServerAliveInterval Value:60}]}]
 ```
 
 If you want to parse a config in a specific directory, pass the path as follows.
@@ -50,10 +51,10 @@ import (
 )
 
 func main() {
-    	// Reads a config file and gets it as a string
+	// Reads a config file and gets it as a string
 	path := gscp.Path("./testData/test1_config")
 	s, _ := gscp.LoadConfig(path)
-    	// parse
+	// parse
 	fmt.Println(gscp.Parse(s))
 }
 ```
