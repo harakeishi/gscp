@@ -1,6 +1,8 @@
 package smp
 
-import "testing"
+import (
+	"testing"
+)
 
 // func TestParse(t *testing.T) {
 // 	type args struct {
@@ -27,10 +29,11 @@ func TestLoadConfig(t *testing.T) {
 		path []option
 	}
 	tests := []struct {
-		name    string
-		args    args
-		want    string
-		wantErr bool
+		name       string
+		args       args
+		want       string
+		wantErr    bool
+		wantErrMsg string
 	}{
 		{
 			name: "The configuration contents are loaded normally.",
@@ -48,17 +51,19 @@ func TestLoadConfig(t *testing.T) {
     IdentityFile ~/.ssh/id_rsa
     # コネクションの切断防止(60秒周期でパケット送信)
     ServerAliveInterval  60`,
-			wantErr: false,
+			wantErr:    false,
+			wantErrMsg: "",
 		},
 		{
-			name: "case1",
+			name: "Errors with non-existent files.",
 			args: args{
 				path: []option{
 					Path("./testData/hoge"),
 				},
 			},
-			want:    "",
-			wantErr: true,
+			want:       "",
+			wantErr:    true,
+			wantErrMsg: "ERROR LoadConfig() Open: open ./testData/hoge: The system cannot find the file specified.",
 		},
 	}
 	for _, tt := range tests {
@@ -67,6 +72,12 @@ func TestLoadConfig(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("LoadConfig() error = %v, wantErr %v", err, tt.wantErr)
 				return
+			}
+			if tt.wantErr {
+				if err.Error() != tt.wantErrMsg {
+					t.Errorf("LoadConfig() errorMsg = %v, wantErrMsg %v", err.Error(), tt.wantErrMsg)
+					return
+				}
 			}
 			if got != tt.want {
 				t.Errorf("LoadConfig() = %v, want %v", got, tt.want)
