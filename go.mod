@@ -1,3 +1,3 @@
-module github.com/harakeishi/smp
+module github.com/harakeishi/gscp
 
 go 1.19

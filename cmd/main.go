@@ -1,8 +1,12 @@
 package main
 
-import "github.com/harakeishi/smp"
+import (
+	"fmt"
+
+	"github.com/harakeishi/gscp"
+)
 
 func main() {
-	s := smp.Load()
-	smp.Parse(s)
+	s, _ := gscp.LoadConfig()
+	fmt.Println(gscp.Parse(s))
 }
