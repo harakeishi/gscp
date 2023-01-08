@@ -81,7 +81,7 @@ func TestParse(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    []Host
+		want    Hosts
 		wantErr bool
 	}{
 		{
@@ -97,7 +97,7 @@ func TestParse(t *testing.T) {
 				# コネクションの切断防止(60秒周期でパケット送信)
 				ServerAliveInterval  60`,
 			},
-			want: []Host{
+			want: Hosts{
 				{
 					Name: "testhost",
 					Options: []Option{
@@ -130,7 +130,7 @@ Host testhost
 	# ホスト名
 	HostName 192.0.2.1`,
 			},
-			want: []Host{
+			want: Hosts{
 				{
 					Name: "testhost",
 					Options: []Option{
@@ -153,6 +153,163 @@ Host testhost
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Parse() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestHost_FindOption(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name string
+		h    Host
+		args args
+		want Option
+	}{
+		{
+			name: "That the specified options are returned correctly",
+			h: Host{
+				Name: "testhost",
+				Options: []Option{
+					{
+						Name:  "HostName",
+						Value: "192.0.2.1",
+					},
+					{
+						Name:  "User",
+						Value: "myuser",
+					},
+					{
+						Name:  "IdentityFile",
+						Value: "~/.ssh/id_rsa",
+					},
+					{
+						Name:  "ServerAliveInterval",
+						Value: "60",
+					},
+				},
+			},
+			args: args{
+				s: "HostName",
+			},
+			want: Option{
+				Name:  "HostName",
+				Value: "192.0.2.1",
+			},
+		},
+		{
+			name: "Empty structure is returned when an option that does not exist is specified.",
+			h: Host{
+				Name: "testhost",
+				Options: []Option{
+					{
+						Name:  "HostName",
+						Value: "192.0.2.1",
+					},
+					{
+						Name:  "IdentityFile",
+						Value: "~/.ssh/id_rsa",
+					},
+					{
+						Name:  "ServerAliveInterval",
+						Value: "60",
+					},
+				},
+			},
+			args: args{
+				s: "User",
+			},
+			want: Option{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.h.FindOption(tt.args.s); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Host.FindOption() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestHosts_FindHost(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name string
+		h    Hosts
+		args args
+		want Host
+	}{
+		{
+			name: "That the specified host is returned correctly.",
+			h: Hosts{
+				{
+					Name: "testHost1",
+					Options: []Option{
+						{
+							Name:  "HostName",
+							Value: "192.0.2.1",
+						},
+					},
+				},
+				{
+					Name: "testHost2",
+					Options: []Option{
+						{
+							Name:  "HostName",
+							Value: "192.0.2.2",
+						},
+					},
+				},
+			},
+			args: args{
+				s: "testHost1",
+			},
+			want: Host{
+				Name: "testHost1",
+				Options: []Option{
+					{
+						Name:  "HostName",
+						Value: "192.0.2.1",
+					},
+				},
+			},
+		},
+		{
+			name: "If a non-existent host is specified, an empty structure is returned.",
+			h: Hosts{
+				{
+					Name: "testHost1",
+					Options: []Option{
+						{
+							Name:  "HostName",
+							Value: "192.0.2.1",
+						},
+					},
+				},
+				{
+					Name: "testHost2",
+					Options: []Option{
+						{
+							Name:  "HostName",
+							Value: "192.0.2.2",
+						},
+					},
+				},
+			},
+			args: args{
+				s: "testHost3",
+			},
+			want: Host{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.h.FindHost(tt.args.s); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Hosts.FindHost() = %v, want %v", got, tt.want)
 			}
 		})
 	}
