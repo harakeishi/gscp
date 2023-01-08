@@ -2,12 +2,19 @@ package gscp
 
 import (
 	"reflect"
+	"runtime"
 	"testing"
 )
 
 func TestLoadConfig(t *testing.T) {
 	type args struct {
 		path []option
+	}
+	var wantErrMsgCaseNonExistent string
+	if runtime.GOOS == "windows" {
+		wantErrMsgCaseNonExistent = "ERROR LoadConfig() Open: open ./testData/hoge: The system cannot find the file specified."
+	} else {
+		wantErrMsgCaseNonExistent = "ERROR LoadConfig() Open: open ./testData/hoge: no such file or directory"
 	}
 	tests := []struct {
 		name       string
@@ -44,7 +51,7 @@ func TestLoadConfig(t *testing.T) {
 			},
 			want:       "",
 			wantErr:    true,
-			wantErrMsg: "ERROR LoadConfig() Open: open ./testData/hoge: no such file or directory",
+			wantErrMsg: wantErrMsgCaseNonExistent,
 		},
 	}
 	for _, tt := range tests {
