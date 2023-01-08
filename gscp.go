@@ -20,11 +20,11 @@ type Option struct {
 	Value string
 }
 
+// Defines optional arguments for LoadConfig ().
+type option func(*LoadOpts)
 type LoadOpts struct {
 	path string
 }
-
-type option func(*LoadOpts)
 
 // Used to specify the path of the config file to be loaded in LoadConfig.
 // Returns the setter function of the path of LoadOpts.
