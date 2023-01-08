@@ -14,6 +14,8 @@ type Host struct {
 	Options []Option
 }
 
+type Hosts []Host
+
 // Represents an ssh config option.
 type Option struct {
 	Name  string
@@ -32,6 +34,24 @@ func Path(p string) option {
 	return func(l *LoadOpts) {
 		l.path = p
 	}
+}
+
+func (h Host) FindOption(s string) Option {
+	for _, v := range h.Options {
+		if v.Name == s {
+			return v
+		}
+	}
+	return Option{}
+}
+
+func (h Hosts) FindHost(s string) Host {
+	for _, v := range h {
+		if v.Name == s {
+			return v
+		}
+	}
+	return Host{}
 }
 
 // Load ssh config.
@@ -60,8 +80,8 @@ func LoadConfig(path ...option) (string, error) {
 }
 
 // Parses a config given as a string.
-func Parse(s string) ([]Host, error) {
-	var hosts []Host
+func Parse(s string) (Hosts, error) {
+	var hosts Hosts
 	reg := "\r\n|\n"
 	tmp := regexp.MustCompile(reg).Split(s, -1)
 	r := regexp.MustCompile(`^[a-zA-Z]`)
