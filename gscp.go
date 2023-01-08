@@ -9,28 +9,35 @@ import (
 	"strings"
 )
 
-type LoadOpts struct {
-	path string
-}
-
 type Host struct {
 	Name    string
 	Options []Option
 }
 
+// Represents an ssh config option.
 type Option struct {
 	Name  string
 	Value string
 }
 
+type LoadOpts struct {
+	path string
+}
+
 type option func(*LoadOpts)
 
+// Used to specify the path of the config file to be loaded in LoadConfig.
+// Returns the setter function of the path of LoadOpts.
 func Path(p string) option {
 	return func(l *LoadOpts) {
 		l.path = p
 	}
 }
 
+// Load ssh config.
+// path is optional.
+// If nothing is done, `~/.ssh.config` is read.
+// To specify a path, pass the return value of Path() as an argument.
 func LoadConfig(path ...option) (string, error) {
 
 	home, _ := os.UserHomeDir()
@@ -52,6 +59,7 @@ func LoadConfig(path ...option) (string, error) {
 	return string(data), nil
 }
 
+// Parses a config given as a string.
 func Parse(s string) ([]Host, error) {
 	var hosts []Host
 	reg := "\r\n|\n"
